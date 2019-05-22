@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+          
+  jmeter-lg1:
+    build: ./loadgenerator
+    
+    command: ./opt/apache-jmeter-5.1.1/bin/jmeter.sh -s -n -Jclient.rmi.localport=7000 -Jserver.rmi.localport=60000 -Jserver.rmi.ssl.disable=true
+    ports:
+    - "6000:6000"
+
+        
+  jmeter-lg2:
+    build: ./loadgenerator
+    command: ./opt/apache-jmeter-5.1.1/bin/jmeter.sh -s -n -Jclient.rmi.localport=7000 -Jserver.rmi.localport=60000 -Jserver.rmi.ssl.disable=true
+    ports:
+    - "6001:6000"
+    
+  jmeter-controller:
+    build: ./controller
+    command: ./opt/apache-jmeter-5.1.1/bin/jmeter.sh -n -Jclient.rmi.localport=7000 -Jserver.rmi.localport=60000 -Jserver.rmi.ssl.disable=true
+    ports:
+    - "7000:7000"
+    #command: ./opt/apache-jmeter-5.1.1/bin/jmeter.sh  -n -X -Jclient.rmi.localport=7000 -Jserver.rmi.ssl.disable=true -R jmeter-lg1,jmeter-lg2  -t /GitHubJmeterTest.jmx -l /result/result.jtl -j /jmeter.log
+    
+  jenkins:
+    image: jenkins
+    environment:
+     - "JAVA_OPTS=-Dhudson.footerURL=http://nidhi.com"    
+    ports:
+     - "80:8080"
+     - "50000:50000"
+    volumes:
+      - 'jenkins_data:/jenkins_config'
+volumes:
+  jenkins_data:
+    driver: local
+   
